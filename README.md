@@ -1,6 +1,6 @@
 # Nexus 3 Configuration As Code
 
-- Tested against Nexus Repository Manager OSS 3.10.0-04
+- Tested against Nexus Repository Manager OSS 3.18.1-01
 
 This project contains scripts and standards for configuration as code for Nexus.
 This allows Nexus configuration changes to be reviewed in pull requests and
@@ -46,6 +46,14 @@ See [additional USAGE](docs/USAGE.md) for more examples and options.
 
 For backing up and restoring a production Nexus installation, refer to the
 [Backup and Restore Guide](./docs/backup_restore.md).
+
+
+# TODO
+
+There is still some work left to do, namely:
+
+- implement APT hosted repositories - i haven't yet had the time to write a check for pgp keypairs
+- implement the 'flat' option on APT proxy repositories
 
 # License
 

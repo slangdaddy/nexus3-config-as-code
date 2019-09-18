@@ -75,6 +75,28 @@
                     }
                 }
             }
+        },
+        "apt": {
+            "proxy": {
+                "proxy-apt-ubuntu-bionic": {
+                    "remote": {
+                        "url": "http://archive.ubuntu.com/ubuntu/"
+                    },
+                    "blobstore": {
+                        "name": "default"
+                    },
+                    "distribution": "bionic"
+                },
+                "proxy-apt-ubuntu-bionic-security": {
+                    "remote": {
+                        "url": "http://archive.ubuntu.com/ubuntu/"
+                    },
+                    "blobstore": {
+                        "name": "default"
+                    },
+                    "distribution": "bionic-security"
+                }
+            }
         }
     },
     "blobstores": {
