@@ -88,11 +88,15 @@ void checkIntValue(String provider, String type, String name, String key, def va
 }
 
 void checkRepositorFormat(Map json) {
+    log.info("Entering checkRepositorFormat")
     String valid_name = '^[a-zA-Z0-9][-_.a-zA-Z0-9]*$'
     Map found = [:]
     json['repositories'].each { provider, provider_value ->
+        log.info("Loop over provider '" + provider + "'")
         provider_value.each { type, type_value ->
+            log.info("Loop over type '" + type + "'")
             type_value.each { name, repo ->
+                log.info("Loop over repo '" + name + "'")
                 if(name in found) {
                     throw new MyException("Repository name conflict.  ${[provider, type, name].join(' -> ')} conflicts with ${found[name]}.")
                 }
@@ -141,6 +145,11 @@ void checkRepositorFormat(Map json) {
                     checkValueInList(provider, type, name, 'version_policy', repo.get('version_policy', 'release').toLowerCase(), ['mixed', 'snapshot', 'release'])
                     checkValueInList(provider, type, name, 'layout_policy', repo.get('layout_policy', 'permissive').toLowerCase(), ['strict', 'permissive'])
                 }
+                else if(provider == 'apt') {
+		    if(repo.get('distribution', '') == '') {
+			    throw new MyException("Repository of type APT requires setting a distribution name!")
+		    }
+		}
                 else if(provider == 'docker') {
                     if(repo['docker']?.get('http_port', null)) {
                         checkIntValue(provider, type, name, 'docker.http_port', repo['docker']?.get('http_port', null), 1, 65535)
@@ -196,7 +205,7 @@ void validateContentSelectors(def json) {
 void validateConfiguration(def json) {
     List<String> supported_root_keys = ['repositories', 'blobstores', 'content_selectors']
     List<String> supported_blobstores = ['file']
-    List<String> supported_repository_providers = ['bower', 'docker', 'gitlfs', 'maven2', 'npm', 'nuget', 'pypi', 'raw', 'rubygems']
+    List<String> supported_repository_providers = ['bower', 'docker', 'gitlfs', 'maven2', 'npm', 'nuget', 'pypi', 'raw', 'rubygems', 'apt']
     List<String> supported_repository_types = ['proxy', 'hosted', 'group']
     if(!(json in Map)) {
         throw new MyException("Configuration is not valid.  It must be a JSON object.  Instead, found a JSON array.")
@@ -224,6 +233,7 @@ void validateConfiguration(def json) {
 }
 
 void createRepository(String provider, String type, String name, Map json) {
+    log.info("Entering createRepository for '" + name + "'")
     Configuration repo_config
     Boolean exists = repositoryManager.get(name) as Boolean
     if(exists) {
@@ -305,6 +315,12 @@ void createRepository(String provider, String type, String name, Map json) {
                 maven.set('versionPolicy', json.get('version_policy', 'RELEASE').toUpperCase())
             }
             maven.set('layoutPolicy', json.get('layout_policy', 'PERMISSIVE').toUpperCase())
+        }
+        else if(provider == 'apt') {
+            def apt = repo_config.attributes('apt')
+            if(!exists) {
+                apt.set('distribution', json.get('distribution', ''))
+            }
         }
         else if(provider == 'docker') {
             def docker = repo_config.attributes('docker')
